@@ -71,8 +71,33 @@ async function mqttSubscribe(topic, fn) {
   });
 }
 
-async function handleSetStateMessage(deviceId, message) {
-  ////
+async function handleSetStateMessage(device, message) {
+  let boolVal;
+
+  try {
+    boolVal = Boolean(JSON.parse(message));
+  } catch (e) {
+    debug('Received invalid set state message for %s, ignoring.', device.displayName, e);
+    return;
+  }
+
+  const changed = boolVal !== device.state;
+  device.state = boolVal;
+  debug('Received set state message for %s: %s (changed=%s)', device.displayName, boolVal, changed);
+
+  await tuyaClient.setState({
+    devId: device.deviceId,
+    setState: boolVal,
+  });
+  debug('Successfully updated state on Tuya');
+
+  emitStateMessage(device);
+}
+
+function emitStateMessage(device) {
+  const {topicPrefix} = mqttConfig;
+  const stateTopic = `${topicPrefix}/${device.topic}/state`;
+  mqttClient.publish(stateTopic, JSON.stringify(device.state), {retain: true});
 }
 
 const refresh = asyncOneAtATime(async () => {
@@ -87,11 +112,9 @@ const refresh = asyncOneAtATime(async () => {
       const changed = device.state != boolVal;
       device.state = boolVal;
 
-      const {topicPrefix} = mqttConfig;
-      const stateTopic = `${topicPrefix}/${device.topic}/state`;
-      mqttClient.publish(stateTopic, JSON.stringify(boolVal), {retain: true});
+      emitStateMessage(device);
 
-      debug('New state for %s: %s (changed=%s)', device.displayName, boolVal, changed);
+      debug('Heard new state for %s from Tuya: %s (changed=%s)', device.displayName, boolVal, changed);
     }
   });
 }, 'refresh');
@@ -117,7 +140,7 @@ async function main() {
     });
 
     const setTopic = `${topicPrefix}/${device.topic}/set_state`;
-    const setSub = mqttSubscribe(setTopic, (message) => handleSetStateMessage(device.deviceId, message));
+    const setSub = mqttSubscribe(setTopic, (message) => handleSetStateMessage(device, message));
 
     return Promise.all([refreshSub, setSub]);
   });
