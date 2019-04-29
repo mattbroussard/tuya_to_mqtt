@@ -4,9 +4,14 @@
   "main": "index.js",
   "author": "Matt Broussard <matt@mattb.io>",
   "license": "MIT",
+  "scripts": {
+    "start": "node tuya_to_mqtt.js"
+  },
   "dependencies": {
     "cloudtuya": "https://github.com/unparagoned/cloudtuya",
     "config": "^3.1.0",
+    "debug": "^4.1.1",
+    "lodash": "^4.17.11",
     "mqtt": "^2.18.8"
   }
 }
