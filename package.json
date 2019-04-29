@@ -1,0 +1,11 @@
+{
+  "name": "tuya_to_mqtt",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Matt Broussard <matt@mattb.io>",
+  "license": "MIT",
+  "dependencies": {
+    "cloudtuya": "https://github.com/unparagoned/cloudtuya",
+    "mqtt": "^2.18.8"
+  }
+}
