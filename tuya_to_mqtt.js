@@ -76,7 +76,24 @@ async function handleSetStateMessage(deviceId, message) {
 }
 
 const refresh = asyncOneAtATime(async () => {
-  // ...
+  debug('Refreshing state from Tuya');
+  const tuyaState = await tuyaClient.state();
+
+  _.forEach(tuyaState, (val, deviceId) => {
+    const boolVal = val === 'ON';
+
+    const device = state[deviceId];
+    if (device) {
+      const changed = device.state != boolVal;
+      device.state = boolVal;
+
+      const {topicPrefix} = mqttConfig;
+      const stateTopic = `${topicPrefix}/${device.topic}/state`;
+      mqttClient.publish(stateTopic, JSON.stringify(boolVal), {retain: true});
+
+      debug('New state for %s: %s (changed=%s)', device.displayName, boolVal, changed);
+    }
+  });
 }, 'refresh');
 
 async function main() {
@@ -86,7 +103,7 @@ async function main() {
   await tuyaClient.login();
 
   debug("Connecting to MQTT...");
-  mqttClient = mqtt.connect(mqttConfig.brokerAddress);
+  mqttClient = mqtt.connect(mqttConfig.brokerAddress, {clientId: mqttConfig.clientId});
   mqttClient.on('message', onMqttMessage);
 
   debug("Setting up MQTT listeners");
@@ -94,7 +111,10 @@ async function main() {
     const {topicPrefix} = mqttConfig;
 
     const refreshTopic = `${topicPrefix}/${device.topic}/refresh`;
-    const refreshSub = mqttSubscribe(refreshTopic, refresh);
+    const refreshSub = mqttSubscribe(refreshTopic, () => {
+      debug('Received refresh request for %s', device.displayName);
+      refresh();
+    });
 
     const setTopic = `${topicPrefix}/${device.topic}/set_state`;
     const setSub = mqttSubscribe(setTopic, (message) => handleSetStateMessage(device.deviceId, message));
@@ -105,6 +125,8 @@ async function main() {
 
   debug("Running initial Tuya refresh.");
   await refresh();
+
+  // debug("Setting up recurring update");
 }
 
 main();
