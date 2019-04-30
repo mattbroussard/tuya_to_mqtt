@@ -1,0 +1,22 @@
+{
+  "misc": {
+    "refreshIntervalMs": 300000,
+  },
+  "tuya": {
+    "userName": "username@example.com",
+    "password": "fake_password",
+    "region": "us"
+  },
+  "mqtt": {
+    "topicPrefix": "tuya",
+    "clientId": "tuya_to_mqtt",
+    "brokerAddress": "mqtt://localhost",
+  },
+  "devices": [
+    {
+      "displayName": "Plug 1",
+      "deviceId": "fake_device_id",
+      "topic": "plug1"
+    }
+  ]
+}
