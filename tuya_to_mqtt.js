@@ -11,6 +11,7 @@ const config = require('config');
 const tuyaConfig = config.get('tuya');
 const mqttConfig = config.get('mqtt');
 const devices = config.get('devices');
+const miscConfig = config.get('misc');
 
 let tuyaClient;
 let mqttClient;
@@ -164,7 +165,11 @@ async function main() {
   debug("Running initial Tuya refresh.");
   await refresh();
 
-  // debug("Setting up recurring update");
+  debug("Setting up recurring update");
+  setInterval(async () => {
+    debug('Running periodic refresh (every %dms)...', miscConfig.refreshIntervalMs);
+    await refresh();
+  }, miscConfig.refreshIntervalMs);
 }
 
 main();

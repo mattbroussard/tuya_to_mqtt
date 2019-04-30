@@ -1,7 +1,7 @@
 {
   "name": "tuya_to_mqtt",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "tuya_to_mqtt.js",
   "author": "Matt Broussard <matt@mattb.io>",
   "license": "MIT",
   "scripts": {
