@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "main": "tuya_to_mqtt.js",
   "author": "Matt Broussard <matt@mattb.io>",
-  "license": "MIT",
   "scripts": {
     "start": "node tuya_to_mqtt.js"
   },
