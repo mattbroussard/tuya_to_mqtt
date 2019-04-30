@@ -165,7 +165,7 @@ async function main() {
   debug("Running initial Tuya refresh.");
   await refresh();
 
-  debug("Setting up recurring update");
+  debug("Setting up recurring update (every %dms)", miscConfig.refreshIntervalMs);
   setInterval(async () => {
     debug('Running periodic refresh (every %dms)...', miscConfig.refreshIntervalMs);
     await refresh();
