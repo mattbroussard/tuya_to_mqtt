@@ -90,9 +90,9 @@ caseless@~0.12.0:
   resolved "https://registry.yarnpkg.com/caseless/-/caseless-0.12.0.tgz#1b681c21ff84033c826543090689420d187151dc"
   integrity sha1-G2gcIf+EAzyCZUMJBolCDRhxUdw=
 
-"cloudtuya@https://github.com/unparagoned/cloudtuya":
+"cloudtuya@https://github.com/mattbroussard/cloudtuya#us-region-fix":
   version "1.0.1"
-  resolved "https://github.com/unparagoned/cloudtuya#5ea4b2543c40a883f3d872b5b0d7706536d81eea"
+  resolved "https://github.com/mattbroussard/cloudtuya#db878fae92e481dbe0b1df51f10692e0a6e35853"
   dependencies:
     debug "^4.1.1"
     request "^2.88.0"

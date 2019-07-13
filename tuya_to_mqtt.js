@@ -120,21 +120,6 @@ const refresh = asyncOneAtATime(async () => {
   });
 }, 'refresh');
 
-function bullshitArrayHack(fn) {
-  // Because CloudTuya has a dumb bug with how it handles checking region whitelist (using the "in"
-  // operator instead of Array.prototype.includes, and also not including "us" in the whitelist),
-  // we mess with Array's prototype so that its check passes (really should just submit a PR to it
-  // or fork it)
-
-  const regionKey = 'us';
-  try {
-    Array.prototype[regionKey] = true;
-    return fn();
-  } finally {
-    delete Array.prototype[regionKey];
-  }
-}
-
 async function connectToMQTT() {
   debug("Connecting to MQTT...");
   mqttClient = mqtt.connect(mqttConfig.brokerAddress, {clientId: mqttConfig.clientId});
@@ -151,8 +136,9 @@ async function connectToMQTT() {
 async function main() {
   debug("Logging into Tuya...");
   // Need to copy the config object because CloudTuya modifies it to add default properties
-  bullshitArrayHack(() => tuyaClient = new CloudTuya({...tuyaConfig}));
+  tuyaClient = new CloudTuya({...tuyaConfig});
   await tuyaClient.login();
+  debug("Logged into Tuya.");
 
   await connectToMQTT();
 
