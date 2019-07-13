@@ -135,15 +135,26 @@ function bullshitArrayHack(fn) {
   }
 }
 
+async function connectToMQTT() {
+  debug("Connecting to MQTT...");
+  mqttClient = mqtt.connect(mqttConfig.brokerAddress, {clientId: mqttConfig.clientId});
+  mqttClient.on('message', onMqttMessage);
+
+  await new Promise((resolve, reject) => {
+    mqttClient.on('error', reject);
+    mqttClient.on('connect', () => resolve());
+  });
+
+  debug('Connected to MQTT.');
+}
+
 async function main() {
   debug("Logging into Tuya...");
   // Need to copy the config object because CloudTuya modifies it to add default properties
   bullshitArrayHack(() => tuyaClient = new CloudTuya({...tuyaConfig}));
   await tuyaClient.login();
 
-  debug("Connecting to MQTT...");
-  mqttClient = mqtt.connect(mqttConfig.brokerAddress, {clientId: mqttConfig.clientId});
-  mqttClient.on('message', onMqttMessage);
+  await connectToMQTT();
 
   debug("Setting up MQTT listeners");
   const mqttSubscribePromises = _.map(state, device => {
