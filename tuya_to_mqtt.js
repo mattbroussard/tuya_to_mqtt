@@ -28,7 +28,9 @@ const state = _
 
 let refreshing = true;
 
-function asyncOneAtATime(fn, memo) {
+// Timeouts will resolve to undefined instead of throwing. Rejections of the underlying function
+// will bubble.
+function asyncOneAtATime(fn, memo, timeout) {
   let currentPromise = null;
 
   return function() {
@@ -37,12 +39,25 @@ function asyncOneAtATime(fn, memo) {
       return currentPromise;
     }
 
-    currentPromise = fn.apply(this, arguments).then(value => {
-      currentPromise = null;
-      return value;
-    }, exception => {
-      currentPromise = null;
-      throw exception;
+    currentPromise = new Promise((resolve, reject) => {
+      let timer = setTimeout(() => {
+        currentPromise = null;
+        timer = null;
+
+        debug('call to %s timed out (%dms), returning undefined', memo, timeout);
+        resolve(undefined);
+      }, timeout);
+
+      fn.apply(this, arguments).then(value => {
+        clearTimeout(timer);
+        timer = null;
+
+        currentPromise = null;
+        resolve(value);
+      }, exception => {
+        currentPromise = null;
+        reject(exception);
+      });
     });
 
     return currentPromise;
@@ -118,7 +133,7 @@ const refresh = asyncOneAtATime(async () => {
       debug('Heard new state for %s from Tuya: %s (changed=%s)', device.displayName, boolVal, changed);
     }
   });
-}, 'refresh');
+}, 'refresh', tuyaConfig.refreshTimeoutMs);
 
 async function connectToMQTT() {
   debug("Connecting to MQTT...");

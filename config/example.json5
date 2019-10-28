@@ -1,6 +1,7 @@
 {
   "misc": {
     "refreshIntervalMs": 300000,
+    "refreshTimeoutMs": 60000,
   },
   "tuya": {
     "userName": "username@example.com",
