@@ -101,12 +101,17 @@ async function handleSetStateMessage(device, message) {
   device.state = boolVal;
   debug('Received set state message for %s: %s (changed=%s)', device.displayName, boolVal, changed);
 
-  await tuyaClient.setState({
-    devId: device.deviceId,
-    setState: boolVal,
-  });
-  debug('Successfully updated state on Tuya');
+  try {
+    await tuyaClient.setState({
+      devId: device.deviceId,
+      setState: boolVal,
+    });
+  } catch (e) {
+    debug('Request to Tuya (set %s to %s) failed: %s', device.displayName, boolVal, e);
+    return;
+  }
 
+  debug('Successfully updated state on Tuya');
   emitStateMessage(device);
 }
 
