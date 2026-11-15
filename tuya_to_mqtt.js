@@ -138,7 +138,7 @@ const refresh = asyncOneAtATime(async () => {
       debug('Heard new state for %s from Tuya: %s (changed=%s)', device.displayName, boolVal, changed);
     }
   });
-}, 'refresh', tuyaConfig.refreshTimeoutMs);
+}, 'refresh', miscConfig.refreshTimeoutMs);
 
 async function connectToMQTT() {
   debug("Connecting to MQTT...");
