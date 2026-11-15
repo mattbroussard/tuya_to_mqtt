@@ -191,11 +191,13 @@ async function main() {
 
 // Tuya rate-limits logins to one per 180s, and every failed attempt seems to restart that window. If we
 // exit immediately, a supervisor (docker/pm2) restarts us in a tight loop that can never succeed. So on a
-// fatal error, wait longer than the window before exiting.
+// fatal startup error, wait longer than the window before exiting.
 const FATAL_EXIT_DELAY_MS = 200 * 1000;
 function exitLater(reason, err) {
   debug('Fatal error (%s); exiting in %ds so restarts do not hit the Tuya login rate limit:', reason, FATAL_EXIT_DELAY_MS / 1000, err);
   setTimeout(() => process.exit(1), FATAL_EXIT_DELAY_MS);
 }
-process.on('unhandledRejection', err => exitLater('unhandledRejection', err));
+// Transient Tuya API errors surface as unhandled rejections (e.g. a failed periodic refresh). The old Node 12
+// runtime only warned about those; keep that behaviour instead of letting Node >= 15 kill the process.
+process.on('unhandledRejection', err => debug('Unhandled rejection (continuing):', err));
 main().catch(err => exitLater('main', err));
